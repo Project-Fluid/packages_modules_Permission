@@ -124,6 +124,7 @@ android_app {
         "libprotobuf-java-lite",
         "SettingsLibUtils",
         "modules-utils-build_system",
+        "FluidUI",
     ],
 
     proto: {

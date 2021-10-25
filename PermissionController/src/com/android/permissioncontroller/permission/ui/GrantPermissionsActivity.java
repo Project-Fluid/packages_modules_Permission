@@ -34,6 +34,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
+
 import android.os.Bundle;
 import android.os.Process;
 import android.text.Annotation;
@@ -46,11 +47,11 @@ import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.core.util.Consumer;
 
-import com.android.modules.utils.build.SdkLevel;
 import com.android.permissioncontroller.DeviceUtils;
 import com.android.permissioncontroller.R;
 import com.android.permissioncontroller.permission.ui.auto.GrantPermissionsAutoViewHandler;
@@ -67,6 +68,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.projectfluid.ui.dialog.FluidBottomSheetDialog;
+
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
 /**
  * An activity which displays runtime permission prompts on behalf of an app.
  */
@@ -75,8 +80,7 @@ public class GrantPermissionsActivity extends SettingsActivity
 
     private static final String LOG_TAG = "GrantPermissionsActivit";
 
-    private static final String KEY_SESSION_ID = GrantPermissionsActivity.class.getName()
-            + "_REQUEST_ID";
+    private static final String KEY_SESSION_ID = GrantPermissionsActivity.class.getName() + "_REQUEST_ID";
     public static final String ANNOTATION_ID = "link";
 
     public static final int NEXT_BUTTON = 11;
@@ -122,8 +126,9 @@ public class GrantPermissionsActivity extends SettingsActivity
     private String mCallingPackage;
     private int mTotalRequests = 0;
     private int mCurrentRequestIdx = 0;
-    private float mOriginalDimAmount;
     private View mRootView;
+    private FluidBottomSheetDialog mDialog;
+    private BottomSheetBehavior mBehavior;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -153,8 +158,6 @@ public class GrantPermissionsActivity extends SettingsActivity
             return;
         }
 
-        setFinishOnTouchOutside(false);
-
         setTitle(R.string.permission_request_title);
 
         if (DeviceUtils.isTelevision(this)) {
@@ -178,40 +181,31 @@ public class GrantPermissionsActivity extends SettingsActivity
         mViewModel.getRequestInfosLiveData().observe(this, this::onRequestInfoLoad);
 
         mRootView = mViewHandler.createView();
-        mRootView.setVisibility(View.GONE);
-        setContentView(mRootView);
-        Window window = getWindow();
-        WindowManager.LayoutParams layoutParams = window.getAttributes();
-        mOriginalDimAmount = layoutParams.dimAmount;
-        mViewHandler.updateWindowAttributes(layoutParams);
-        window.setAttributes(layoutParams);
+        mDialog = buildDialog(mRootView);
 
-        if (SdkLevel.isAtLeastS() && getResources().getBoolean(R.bool.config_useWindowBlur)) {
-            java.util.function.Consumer<Boolean> blurEnabledListener = enabled -> {
-                mViewHandler.onBlurEnabledChanged(window, enabled);
-            };
-            mRootView.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
-                @Override
-                public void onViewAttachedToWindow(View v) {
-                    window.getWindowManager().addCrossWindowBlurEnabledListener(
-                            blurEnabledListener);
-                }
-
-                @Override
-                public void onViewDetachedFromWindow(View v) {
-                    window.getWindowManager().removeCrossWindowBlurEnabledListener(
-                            blurEnabledListener);
-                }
-            });
-        }
         // Restore UI state after lifecycle events. This has to be before we show the first request,
         // as the UI behaves differently for updates and initial creations.
         if (icicle != null) {
             mViewHandler.loadInstanceState(icicle);
-        } else {
-            // Do not show screen dim until data is loaded
-            window.setDimAmount(0f);
         }
+
+        mDialog.show();
+        mBehavior = BottomSheetBehavior.from(getBottomSheetLayout());
+        mBehavior.setDraggable(false);
+        mBehavior.setHideable(false);
+        mBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    public FrameLayout getBottomSheetLayout() {
+        return (FrameLayout) mDialog.findViewById(com.google.android.material.R.id.design_bottom_sheet);
+    }
+
+    private FluidBottomSheetDialog buildDialog(View view) {
+        FluidBottomSheetDialog bottomSheetDialog = new FluidBottomSheetDialog(this, false);
+        bottomSheetDialog.setContentView(view);
+        bottomSheetDialog.setCancelable(false);
+        bottomSheetDialog.setCanceledOnTouchOutside(false);
+        return bottomSheetDialog;
     }
 
     private void onRequestInfoLoad(List<RequestInfo> requests) {
@@ -339,9 +333,6 @@ public class GrantPermissionsActivity extends SettingsActivity
         if (showingNewGroup) {
             mCurrentRequestIdx++;
         }
-
-        getWindow().setDimAmount(mOriginalDimAmount);
-        mRootView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -419,7 +410,7 @@ public class GrantPermissionsActivity extends SettingsActivity
 
     @Override
     public void onBackPressed() {
-        mViewHandler.onBackPressed();
+        // No-op
     }
 
     @Override

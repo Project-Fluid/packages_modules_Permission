@@ -220,7 +220,6 @@
             <item type="style" name="GrantPermissions" />
             <item type="style" name="Header.Settings" />
             <item type="style" name="RequestRole" />
-            <item type="style" name="Theme.PermissionGrantDialog" />
             <item type="style" name="PermissionDialog" />
             <!-- END THEMES -->
 
