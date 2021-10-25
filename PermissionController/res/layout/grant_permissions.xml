@@ -18,7 +18,7 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     style="@style/PermissionGrantScrollView">
 
     <LinearLayout
@@ -29,12 +29,13 @@
         <!-- The dialog -->
         <LinearLayout
             android:id="@+id/grant_dialog"
-            android:theme="@style/Theme.PermissionGrantDialog"
+            android:layout_gravity="center|bottom"
             android:importantForAccessibility="no"
             style="@style/PermissionGrantDialog">
 
             <LinearLayout
                 android:id="@+id/content_container"
+                android:layout_gravity="center|bottom"
                 style="@style/PermissionGrantContent">
 
                 <LinearLayout

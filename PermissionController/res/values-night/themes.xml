@@ -23,15 +23,10 @@
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="*android:windowFixedHeightMajor">100%</item>
         <item name="*android:windowFixedHeightMinor">100%</item>
+        <item name="bottomSheetDialogTheme">@style/Fluid.Components.BottomSheetDialog</item>
         <!-- The following attributes change the behavior of the dialog, hence they should not be
              themed -->
         <item name="android:windowIsTranslucent">true</item>
-    </style>
-
-    <style name="Theme.PermissionGrantDialog"
-           parent="@android:style/Theme.DeviceDefault.Dialog">
-        <item name="android:colorBackground">@color/google_grey_800</item>
-        <item name="android:divider">@drawable/list_divider</item>
     </style>
 
     <style name="PermissionDialog"

@@ -42,41 +42,22 @@ import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams
 import android.view.accessibility.AccessibilityNodeInfo
-import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.TextView
+
 import com.android.permissioncontroller.R
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.ALLOW_ALWAYS_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.ALLOW_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.ALLOW_FOREGROUND_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.ALLOW_ONE_TIME_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.COARSE_RADIO_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.DENY_AND_DONT_ASK_AGAIN_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.DENY_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.DIALOG_WITH_BOTH_LOCATIONS
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.DIALOG_WITH_COARSE_LOCATION_ONLY
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.DIALOG_WITH_FINE_LOCATION_ONLY
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.FINE_RADIO_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.LOCATION_ACCURACY_LAYOUT
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NEXT_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NEXT_LOCATION_DIALOG
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NO_UPGRADE_AND_DONT_ASK_AGAIN_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NO_UPGRADE_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NO_UPGRADE_OT_AND_DONT_ASK_AGAIN_BUTTON
-import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.NO_UPGRADE_OT_BUTTON
+import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity
+import com.android.permissioncontroller.permission.ui.GrantPermissionsActivity.*
 import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.CANCELED
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.DENIED
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.DENIED_DO_NOT_ASK_AGAIN
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.GRANTED_ALWAYS
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.GRANTED_FOREGROUND_ONLY
-import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.GRANTED_ONE_TIME
+import com.android.permissioncontroller.permission.ui.GrantPermissionsViewHandler.*
+
+import org.projectfluid.ui.anim.Interpolators
 
 class GrantPermissionsViewHandlerImpl(
-    private val mActivity: Activity,
+    private val mActivity: GrantPermissionsActivity,
     private val mAppPackageName: String,
     private val mUserHandle: UserHandle
 ) : GrantPermissionsViewHandler, OnClickListener {
@@ -183,9 +164,9 @@ class GrantPermissionsViewHandlerImpl(
         //      Animate change in size
         //      Grow or shrink the content container to size of new content
         val growShrinkToNewContentSize = ChangeBounds()
+        growShrinkToNewContentSize.addTarget(mActivity.getBottomSheetLayout())
         growShrinkToNewContentSize.duration = ANIMATION_DURATION_MILLIS
-        growShrinkToNewContentSize.interpolator = AnimationUtils.loadInterpolator(mActivity,
-            android.R.interpolator.fast_out_slow_in)
+        growShrinkToNewContentSize.interpolator = Interpolators.FluidDecelerateInterpolator()
         TransitionManager.beginDelayedTransition(rootView, growShrinkToNewContentSize)
     }
 
@@ -196,8 +177,6 @@ class GrantPermissionsViewHandlerImpl(
             .inflate(R.layout.grant_permissions, null) as ViewGroup
         this.rootView = rootView
 
-        val h = mActivity.resources.displayMetrics.heightPixels
-        rootView.minimumHeight = h
         // Cancel dialog
         rootView.findViewById<View>(R.id.grant_singleton)!!.setOnClickListener(this)
         // Swallow click event
@@ -497,11 +476,7 @@ class GrantPermissionsViewHandlerImpl(
     }
 
     override fun onBackPressed() {
-        if (resultListener == null) {
-            mActivity.finishAfterTransition()
-            return
-        }
-        resultListener?.onPermissionGrantResult(groupName, CANCELED)
+        // No-op
     }
 
     companion object {
@@ -518,7 +493,7 @@ class GrantPermissionsViewHandlerImpl(
 
         // Animation parameters.
         private const val SWITCH_TIME_MILLIS: Long = 75
-        private const val ANIMATION_DURATION_MILLIS: Long = 200
+        private const val ANIMATION_DURATION_MILLIS: Long = 250
 
         private val BUTTON_RES_ID_TO_NUM = SparseIntArray()
         private val LOCATION_RES_ID_TO_NUM = SparseIntArray()

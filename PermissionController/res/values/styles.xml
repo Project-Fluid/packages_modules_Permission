@@ -57,9 +57,10 @@
     </style>
 
     <style name="PermissionGrantTitleIcon">
-        <item name="android:layout_width">24dp</item>
-        <item name="android:layout_height">24dp</item>
-        <item name="android:layout_marginBottom">12dp</item>
+        <item name="android:layout_width">36dp</item>
+        <item name="android:layout_height">36dp</item>
+        <item name="android:layout_marginTop">6dp</item>
+        <item name="android:layout_marginBottom">22dp</item>
         <item name="android:tint">?android:attr/colorAccent</item>
         <item name="android:scaleType">fitCenter</item>
     </style>
@@ -134,11 +135,9 @@
     </style>
 
     <style name="PermissionGrantButton"
-           parent="@android:style/Widget.DeviceDefault.Button.Borderless.Colored">
-        <item name="android:layout_width">match_parent</item>
+           parent="@style/Fluid.Components.BottomSheetDialog.Button">
         <item name="android:layout_height">56dp</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
+        <item name="android:foreground">@android:color/transparent</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
